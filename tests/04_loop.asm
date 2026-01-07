@@ -1,0 +1,7 @@
+PUSH 3
+loop:
+PUSH 1
+SUB
+DUP
+JNZ loop
+HALT

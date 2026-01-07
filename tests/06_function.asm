@@ -1,0 +1,8 @@
+PUSH 10
+CALL add
+HALT
+
+add:
+PUSH 20
+ADD
+RET

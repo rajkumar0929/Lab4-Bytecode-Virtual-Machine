@@ -1,0 +1,7 @@
+PUSH 3
+PUSH 5
+CMP
+JZ skip
+PUSH 99
+skip:
+HALT

@@ -1,34 +1,61 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdint.h>
+
 #include "vm.h"
 
-int main() {
-    /*
-        main:
-            PUSH 10
-            CALL func
-            HALT
+int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <program.bc>\n", argv[0]);
+        return 1;
+    }
 
-        func:
-            PUSH 20
-            ADD
-            RET
-    */
+    const char *filename = argv[1];
+    FILE *f = fopen(filename, "rb");
+    if (!f) {
+        perror("Failed to open bytecode file");
+        return 1;
+    }
 
-    uint8_t code[] = {
-        OP_PUSH, 10, 0, 0, 0,      // 0
-        OP_CALL, 11, 0, 0, 0,      // 5 → jump to func
-        OP_HALT,                  // 10
+    /* Determine file size */
+    fseek(f, 0, SEEK_END);
+    long size = ftell(f);
+    rewind(f);
 
-        OP_PUSH, 20, 0, 0, 0,      // 11 (func)
-        OP_ADD,                   // 16
-        OP_RET                    // 17
-    };
+    if (size <= 0) {
+        fprintf(stderr, "Invalid bytecode file size\n");
+        fclose(f);
+        return 1;
+    }
 
+    /* Allocate memory for bytecode */
+    uint8_t *code = malloc(size);
+    if (!code) {
+        perror("Memory allocation failed");
+        fclose(f);
+        return 1;
+    }
+
+    /* Read bytecode */
+    if (fread(code, 1, size, f) != (size_t)size) {
+        fprintf(stderr, "Failed to read bytecode file\n");
+        free(code);
+        fclose(f);
+        return 1;
+    }
+
+    fclose(f);
+
+    /* Initialize and run VM */
     VM vm;
-    vm_init(&vm, code, sizeof(code));
+    vm_init(&vm, code, size);
     vm_run(&vm);
 
-    printf("Final result = %d\n", vm.stack[vm.sp]);
+    /* Optional: print final stack top if exists */
+    if (vm.sp >= 0) {
+        printf("Top of stack: %d\n", vm.stack[vm.sp]);
+    }
+
+    free(code);
     return 0;
 }
