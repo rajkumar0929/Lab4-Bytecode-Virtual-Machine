@@ -19,6 +19,10 @@
 #define OP_DIV  0x13
 #define OP_CMP  0x14
 
+#define OP_JMP 0x20
+#define OP_JZ  0x21
+#define OP_JNZ 0x22
+
 #define OP_HALT 0xFF
 
 

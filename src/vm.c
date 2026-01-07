@@ -164,6 +164,99 @@ void vm_run(VM *vm) {
                 break;
             }
 
+            case OP_JMP: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete JMP operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int addr =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                if (addr < 0 || addr >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Invalid JMP address\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->pc = addr;
+                continue;
+            }
+
+            case OP_JZ: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete JZ operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                if (vm->sp < 0) {
+                    fprintf(stderr, "Runtime error: Stack underflow on JZ\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int addr =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                int cond = vm->stack[vm->sp--];
+
+                if (cond == 0) {
+                    if (addr < 0 || addr >= vm->code_size) {
+                        fprintf(stderr, "Runtime error: Invalid JZ address\n");
+                        vm->running = false;
+                        break;
+                    }
+                    vm->pc = addr;
+                    continue;
+                }
+
+                vm->pc += 5;
+                break;
+            }
+
+            case OP_JNZ: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete JNZ operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                if (vm->sp < 0) {
+                    fprintf(stderr, "Runtime error: Stack underflow on JNZ\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int addr =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                int cond = vm->stack[vm->sp--];
+
+                if (cond != 0) {
+                    if (addr < 0 || addr >= vm->code_size) {
+                        fprintf(stderr, "Runtime error: Invalid JNZ address\n");
+                        vm->running = false;
+                        break;
+                    }
+                    vm->pc = addr;
+                    continue;
+                }
+
+                vm->pc += 5;
+                break;
+            }
+
 
 
             default:
