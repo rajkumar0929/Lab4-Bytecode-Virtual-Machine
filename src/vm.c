@@ -83,6 +83,89 @@ void vm_run(VM *vm) {
                 vm->pc++;
                 break;
 
+            case OP_ADD: {
+                if (vm->sp < 1) {
+                    fprintf(stderr, "Runtime error: Stack underflow on ADD\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int b = vm->stack[vm->sp--];
+                int a = vm->stack[vm->sp--];
+
+                vm->stack[++vm->sp] = a + b;
+                vm->pc++;
+                break;
+            }
+
+            case OP_SUB: {
+                if (vm->sp < 1) {
+                    fprintf(stderr, "Runtime error: Stack underflow on SUB\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int b = vm->stack[vm->sp--];
+                int a = vm->stack[vm->sp--];
+
+                vm->stack[++vm->sp] = a - b;
+                vm->pc++;
+                break;
+            }
+
+            case OP_MUL: {
+                if (vm->sp < 1) {
+                    fprintf(stderr, "Runtime error: Stack underflow on MUL\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int b = vm->stack[vm->sp--];
+                int a = vm->stack[vm->sp--];
+
+                vm->stack[++vm->sp] = a * b;
+                vm->pc++;
+                break;
+            }
+
+            case OP_DIV: {
+                if (vm->sp < 1) {
+                    fprintf(stderr, "Runtime error: Stack underflow on DIV\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int b = vm->stack[vm->sp--];
+                int a = vm->stack[vm->sp--];
+
+                if (b == 0) {
+                    fprintf(stderr, "Runtime error: Division by zero\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->stack[++vm->sp] = a / b;
+                vm->pc++;
+                break;
+            }
+
+            case OP_CMP: {
+                if (vm->sp < 1) {
+                    fprintf(stderr, "Runtime error: Stack underflow on CMP\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int b = vm->stack[vm->sp--];
+                int a = vm->stack[vm->sp--];
+
+                vm->stack[++vm->sp] = (a < b) ? 1 : 0;
+                vm->pc++;
+                break;
+            }
+
+
+
             default:
                 fprintf(stderr,
                         "Runtime error: Invalid opcode 0x%02X at PC=%d\n",

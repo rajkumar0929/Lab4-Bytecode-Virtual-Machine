@@ -4,9 +4,9 @@
 
 int main() {
     uint8_t code[] = {
-        OP_PUSH, 10, 0, 0, 0,   // PUSH 10
-        OP_DUP,                // DUP -> [10, 10]
-        OP_POP,                // POP -> [10]
+        OP_PUSH, 5, 0, 0, 0,    // PUSH 3
+        OP_PUSH, 3, 0, 0, 0,    // PUSH 5
+        OP_CMP,                // 3 < 5 → 1
         OP_HALT
     };
 
@@ -14,8 +14,6 @@ int main() {
     vm_init(&vm, code, sizeof(code));
     vm_run(&vm);
 
-    printf("Stack pointer = %d\n", vm.sp);
-    printf("Top of stack = %d\n", vm.stack[vm.sp]);
-
+    printf("CMP result = %d\n", vm.stack[vm.sp]);
     return 0;
 }

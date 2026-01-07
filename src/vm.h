@@ -17,6 +17,7 @@
 #define OP_SUB  0x11
 #define OP_MUL  0x12
 #define OP_DIV  0x13
+#define OP_CMP  0x14
 
 #define OP_HALT 0xFF
 
