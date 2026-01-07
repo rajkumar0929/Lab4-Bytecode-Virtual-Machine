@@ -23,6 +23,11 @@
 #define OP_JZ  0x21
 #define OP_JNZ 0x22
 
+#define OP_STORE 0x30
+#define OP_LOAD  0x31
+#define OP_CALL 0x40
+#define OP_RET  0x41
+
 #define OP_HALT 0xFF
 
 

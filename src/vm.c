@@ -257,6 +257,106 @@ void vm_run(VM *vm) {
                 break;
             }
 
+            case OP_STORE: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete STORE operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                if (vm->sp < 0) {
+                    fprintf(stderr, "Runtime error: Stack underflow on STORE\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int idx =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                if (idx < 0 || idx >= MEM_SIZE) {
+                    fprintf(stderr, "Runtime error: Invalid memory index on STORE\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->memory[idx] = vm->stack[vm->sp--];
+                vm->pc += 5;
+                break;
+            }
+
+            case OP_LOAD: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete LOAD operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                if (vm->sp >= STACK_SIZE - 1) {
+                    fprintf(stderr, "Runtime error: Stack overflow on LOAD\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int idx =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                if (idx < 0 || idx >= MEM_SIZE) {
+                    fprintf(stderr, "Runtime error: Invalid memory index on LOAD\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->stack[++vm->sp] = vm->memory[idx];
+                vm->pc += 5;
+                break;
+            }
+
+            case OP_CALL: {
+                if (vm->pc + 4 >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Incomplete CALL operand\n");
+                    vm->running = false;
+                    break;
+                }
+
+                if (vm->rsp >= RET_STACK_SIZE - 1) {
+                    fprintf(stderr, "Runtime error: Return stack overflow\n");
+                    vm->running = false;
+                    break;
+                }
+
+                int addr =
+                    vm->code[vm->pc + 1] |
+                    (vm->code[vm->pc + 2] << 8) |
+                    (vm->code[vm->pc + 3] << 16) |
+                    (vm->code[vm->pc + 4] << 24);
+
+                if (addr < 0 || addr >= vm->code_size) {
+                    fprintf(stderr, "Runtime error: Invalid CALL address\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->ret_stack[++vm->rsp] = vm->pc + 5;  // save return address
+                vm->pc = addr;
+                continue;
+            }
+
+            case OP_RET:
+                if (vm->rsp < 0) {
+                    fprintf(stderr, "Runtime error: Return stack underflow on RET\n");
+                    vm->running = false;
+                    break;
+                }
+
+                vm->pc = vm->ret_stack[vm->rsp--];
+                continue;
+
 
 
             default:
